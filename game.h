@@ -203,7 +203,7 @@ void Game::set(Block*b) {
 
 }
 void Game::set_height(Block*b) {
-	if (b->cell_loc(4).first < height) height = b->cell_loc(4).first;
+	if (b->highest_cell_loc().first < height) height = b->highest_cell_loc().first;
 }
 
 //偵測是否有連線且消除
