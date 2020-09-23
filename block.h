@@ -62,12 +62,16 @@ pair<int, int> Block::cell_loc(int n) {
 pair<int, int> Block::highest_cell_loc() {
 	if (cell1.first <= cell2.first && cell1.first <= cell3.first && cell1.first <= cell4.first)
 		return make_pair(cell1.first + ref_p.first, cell1.second + ref_p.second);
-	if (cell2.first <= cell1.first && cell2.first <= cell3.first && cell2.first <= cell4.first)
+	else if (cell2.first <= cell1.first && cell2.first <= cell3.first && cell2.first <= cell4.first)
 		return make_pair(cell2.first + ref_p.first, cell2.second + ref_p.second);
-	if (cell3.first <= cell1.first && cell3.first <= cell2.first && cell3.first <= cell4.first)
+	else if (cell3.first <= cell1.first && cell3.first <= cell2.first && cell3.first <= cell4.first)
 		return make_pair(cell3.first + ref_p.first, cell3.second + ref_p.second);
-	if (cell4.first <= cell1.first && cell4.first <= cell2.first && cell4.first <= cell3.first)
+	else if (cell4.first <= cell1.first && cell4.first <= cell2.first && cell4.first <= cell3.first)
 		return make_pair(cell4.first + ref_p.first, cell4.second + ref_p.second);
+	else {
+		cout << "no highest cell???" << endl;
+		exit(1);
+	}
 }
 
 class S1 :public Block
