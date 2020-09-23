@@ -14,8 +14,6 @@ Block* get_block_type(string op, int r, int m);
 int main() {
 
 	Game g;		//including game init(set row/col)
-
-
 	play(g);
 	game_final(g);
 
