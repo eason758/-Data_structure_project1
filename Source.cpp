@@ -11,6 +11,8 @@ void game_final(Game& g);	//將結果顯示出來
 Block* get_block_type(string op, int r, int m);
 
 
+
+
 int main() {
 
 	Game g;		//including game init(set row/col)
@@ -39,8 +41,8 @@ void play(Game& g) {
 
 void game_final(Game& g) {
 
-	for (int i = 1; i <= g.get_row(); i++) {
-		for (int j = 1; j <= g.get_col(); j++) {
+	for (int i = 0; i < g.get_row(); i++) {
+		for (int j = 0; j < g.get_col(); j++) {
 			cout <<" "<< g.pos(i,j);
 		}
 		cout << " \n";
@@ -48,7 +50,7 @@ void game_final(Game& g) {
 }
 
 Block* get_block_type(string op, int r, int m) {
-
+	r--;
 	if (op == "I1")
 	{
 		return new I1(r, m);
