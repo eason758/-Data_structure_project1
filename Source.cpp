@@ -11,6 +11,8 @@ void game_final(Game& g);	//將結果顯示出來
 Block* get_block_type(string op, int r, int m);
 
 
+
+
 int main() {
 
 	Game g;		//including game init(set row/col)

@@ -14,7 +14,12 @@ protected:
 	pair<int, int> cell2;
 	pair<int, int> cell3;
 	pair<int, int> cell4;
-
+	pair<int, int>& cell(int k) {
+		if (k == 1) return cell1;
+		else if (k == 2) return cell2;
+		else if (k == 3) return cell3;
+		else return cell4;
+	}
 
 public:
 	pair<int, int> cell_loc(int n);
@@ -79,7 +84,7 @@ class S1 :public Block
 	public:
 		S1(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0,r);
+			ref_p = make_pair(-1,r);
 			move_s = m;
 		}
 	private:
@@ -96,7 +101,7 @@ class S2 :public Block
 	public:
 		S2(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -113,7 +118,7 @@ class Z1 :public Block
 	public:
 		Z1(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -130,7 +135,7 @@ class Z2 :public Block
 	public:
 		Z2(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -147,7 +152,7 @@ class L1 :public Block
 	public:
 		L1(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -164,7 +169,7 @@ class L2 :public Block
 	public:
 		L2(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -181,7 +186,7 @@ class L3 :public Block
 	public:
 		L3(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -215,7 +220,7 @@ class J1 :public Block
 	public:
 		J1(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -232,7 +237,7 @@ class J2 :public Block
 	public:
 		J2(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -249,7 +254,7 @@ class J3 :public Block
 	public:
 		J3(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -266,7 +271,7 @@ class J4 :public Block
 	public:
 		J4(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -283,7 +288,7 @@ class T1 :public Block
 	public:
 		T1(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -300,7 +305,7 @@ class T2 :public Block
 	public:
 		T2(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -317,7 +322,7 @@ class T3 :public Block
 	public:
 		T3(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -334,7 +339,7 @@ class T4 :public Block
 	public:
 		T4(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -351,7 +356,7 @@ class I1 :public Block
 	public:
 		I1(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -368,7 +373,7 @@ class I2 :public Block
 	public:
 		I2(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
@@ -385,7 +390,7 @@ class O :public Block
 	public:
 		O(int r, int m) {
 			set_cells();
-			ref_p = make_pair(0, r);
+			ref_p = make_pair(-1, r);
 			move_s = m;
 		}
 	private:
