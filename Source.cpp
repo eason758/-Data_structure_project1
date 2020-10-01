@@ -7,10 +7,11 @@ using namespace std;
 enum E {
 	OUT_OF_RANGE = 1,
 	TOO_HIGH,
-	STILL_TOO_HIGH,
 	HRZT_HIT,
+	WRONG_BLOCK,
 	CONSTRUCT_ERROR
 };
+void error(int e);
 
 
 class Block
@@ -380,40 +381,6 @@ private:
 };
 
 
-pair<int, int> Block::cell_loc(int n) {
-	switch (n)
-	{
-	case 1:
-		return make_pair(cell1.first + ref_p.first, cell1.second + ref_p.second);
-	case 2:
-		return make_pair(cell2.first + ref_p.first, cell2.second + ref_p.second);
-	case 3:
-		return make_pair(cell3.first + ref_p.first, cell3.second + ref_p.second);
-	case 4:
-		return make_pair(cell4.first + ref_p.first, cell4.second + ref_p.second);
-	default:
-		cout << "not that many cells" << endl;
-		exit(1);
-	}
-}
-
-pair<int, int> Block::highest_cell_loc() {
-	if (cell1.first <= cell2.first && cell1.first <= cell3.first && cell1.first <= cell4.first)
-		return make_pair(cell1.first + ref_p.first, cell1.second + ref_p.second);
-	else if (cell2.first <= cell1.first && cell2.first <= cell3.first && cell2.first <= cell4.first)
-		return make_pair(cell2.first + ref_p.first, cell2.second + ref_p.second);
-	else if (cell3.first <= cell1.first && cell3.first <= cell2.first && cell3.first <= cell4.first)
-		return make_pair(cell3.first + ref_p.first, cell3.second + ref_p.second);
-	else if (cell4.first <= cell1.first && cell4.first <= cell2.first && cell4.first <= cell3.first)
-		return make_pair(cell4.first + ref_p.first, cell4.second + ref_p.second);
-	else {
-		cout << "no highest cell???" << endl;
-		exit(1);
-	}
-}
-
-
-
 class Game
 {
 
@@ -461,215 +428,6 @@ private:
 };
 
 
-Game::Game()
-{
-	cout << "game construct" << endl;
-	cin >> row >> col;
-	height = row - 1;
-	board = new bool*[row];
-	if (!board) {
-		exit(1);//erro_print(CONSTRUCT_ERROR);
-
-	}
-	for (int i = 0; i < row; i++) {
-		board[i] = new bool[col];
-		if (!board[i]) {
-			cout << "board col " << i << " establish not complete" << endl;
-			exit(1);//erro_print(CONSTRUCT_ERROR);
-		}
-		for (int j = 0; j < col; j++) {
-			board[i][j] = 0;
-		}
-	}
-}
-Game::~Game()
-{
-	cout << "game delete" << endl;
-	for (int i = 0; i < row; i++) delete[]board[i];
-	delete[]board;
-}
-
-//大流程
-//9/24助教解惑後:
-//下落 - 著地or卡到方塊(包含碰到最上層) - 執行橫移 - (下落)-確定位置 - 消去 - 判定有無超出邊界
-//最後位置確定後，先消除再看是否還有超出邊界
-//橫移卡到算失敗
-void Game::block_down(Block* b) {
-
-	//左右out of range
-	if (out_of_range(b))
-		exit(1);//erro_print(OUT_OF_RANGE);
-
-	//完整的顯示進去board 如果不行就 too high!
-	show_up(b);
-
-	//掉下去 直到碰到底後左右移動+再下去
-	fall(b);
-
-	//occupy空間
-	set(b);
-
-	detect_line(b);
-
-}
-
-
-//左右是否超出界線(包含預測橫移後)
-bool Game::out_of_range(Block* b) {
-	if (b->cell_loc(1).second + b->move_s < 0 || b->cell_loc(1).second + b->move_s >= col ||
-		b->cell_loc(2).second + b->move_s < 0 || b->cell_loc(2).second + b->move_s >= col ||
-		b->cell_loc(3).second + b->move_s < 0 || b->cell_loc(3).second + b->move_s >= col ||
-		b->cell_loc(4).second + b->move_s < 0 || b->cell_loc(4).second + b->move_s >= col)
-		return 1;
-	else
-		return 0;
-}
-
-//包含碰到要橫移(包含全部超出邊界依然碰到也橫移)
-void Game::show_up(Block*b) {
-
-	while (b->cell_loc(1).first < 0 || b->cell_loc(2).first < 0 ||
-		b->cell_loc(4).first < 0 || b->cell_loc(3).first < 0)
-	{
-		if (occupied(b, 1, 0))	//下一格有撞到
-		{
-
-			if (b->move_s != 0) //還沒橫移過
-			{
-				hrzt_move(b);	//完成橫移
-				continue;
-			}
-			else {				//已經橫移過
-				height = 0;
-				for (int k = 1; k <= 4; k++) {
-					if (b->cell_loc(k).first >= 0)
-						pos(b->cell_loc(k).first, b->cell_loc(k).second) = 1;
-				}
-				if (detect_line(b)) continue;//削掉後再判定一次
-
-				exit(1);//erro_print(STILL_TOO_HIGH);	//橫移過/削掉後還是太高
-			}
-		}
-
-		b->ref_p.first += 1;	//如果能下降就下降
-	}
-}
-
-//包含碰到要橫移
-void Game::fall(Block*b) {
-
-	while (!occupied(b, 1, 0))
-	{
-		b->ref_p.first += 1;
-	}
-
-	if (b->move_s != 0) {
-		hrzt_move(b);
-		fall(b);
-	}
-
-}
-
-//設立方塊並計算高度
-void Game::set(Block*b) {
-
-	pos(b->cell_loc(1).first, b->cell_loc(1).second) = 1;
-	pos(b->cell_loc(2).first, b->cell_loc(2).second) = 1;
-	pos(b->cell_loc(3).first, b->cell_loc(3).second) = 1;
-	pos(b->cell_loc(4).first, b->cell_loc(4).second) = 1;
-
-	set_height(b);
-
-}
-void Game::set_height(Block*b) {
-	if (b->highest_cell_loc().first < height) height = b->highest_cell_loc().first;
-}
-
-//偵測是否有連線且消除
-bool Game::detect_line(Block*b) {
-
-	bool flag = false;
-
-	for (int i = height; i < row; i++) {
-		for (int j = 0; j < col; j++) {
-			if (!pos(i, j)) break;
-			if (j == col - 1) {
-				remove(b, i);
-				flag = true;
-			}
-		}
-	}
-
-	return flag;
-}
-void Game::remove(Block* b, int r) {
-
-	//還在show_up的case
-	if (b->cell_loc(1).first < 0 || b->cell_loc(2).first < 0 ||
-		b->cell_loc(4).first < 0 || b->cell_loc(3).first < 0)
-	{
-		for (int k = 1; k <= 4; k++)
-			if (b->cell_loc(k).first < r) b->cell(k).first += 1;	//讓方塊判定下降
-
-		for (int i = r; i >= height; i--) {
-			for (int j = 0; j < col; j++) {
-				if (i == 0)  					//最上層
-					pos(i, j) = 0;
-				else
-					pos(i, j) = pos(i - 1, j);
-			}
-		}
-
-		for (int k = 1; k <= 4; k++) {
-			if (b->cell_loc(k).first == 0)
-				pos(b->cell_loc(k).first, b->cell_loc(k).second) = 1;
-			//該col上面還有未進去的block 讓他降下來
-		}
-	}
-	//已經fall的case
-	else {
-		for (int k = 1; k <= 4; k++)
-			if (b->cell_loc(k).first < r) b->cell(k).first += 1;	//讓方塊判定下降
-
-		for (int i = r; i >= height; i--) {
-			for (int j = 0; j < col; j++) {
-				if (i == 0)  					//最上層
-					pos(i, j) = 0;
-				else
-					pos(i, j) = pos(i - 1, j);
-			}
-		}
-	}
-}
-
-
-void Game::hrzt_move(Block* b) {
-
-	while (b->move_s != 0) {
-		b->move();
-		if (occupied(b, 0, 0))
-			exit(1);//erro_print(HRZT_HIT);
-	}
-}
-
-// i = offset of y ; j = offset of x
-bool Game::occupied(Block*b, int i, int j) {
-
-	if (b->cell_loc(1).first + i >= row || b->cell_loc(2).first + i >= row ||
-		b->cell_loc(4).first + i >= row || b->cell_loc(3).first + i >= row)
-		return 1;
-
-	if ((b->cell_loc(1).first + i >= 0 && pos(b->cell_loc(1).first + i, b->cell_loc(1).second + j)) ||
-		(b->cell_loc(2).first + i >= 0 && pos(b->cell_loc(2).first + i, b->cell_loc(2).second + j)) ||
-		(b->cell_loc(3).first + i >= 0 && pos(b->cell_loc(3).first + i, b->cell_loc(3).second + j)) ||
-		(b->cell_loc(4).first + i >= 0 && pos(b->cell_loc(4).first + i, b->cell_loc(4).second + j)))
-		return 1;
-	else return 0;
-}
-
-
-
-void erro_print(int e);
 void debug(Game& g);
 void play(Game& g);		//收testcase且計算
 void game_final(Game& g);	//將結果顯示出來
@@ -678,11 +436,11 @@ Block* get_block_type(string op, int r, int m);
 
 
 int main() {
-	cout << 1;
+
 	Game g;		//including game init(set row/col)
 	play(g);
 	game_final(g);
-
+	
 	return 0;
 }
 
@@ -693,13 +451,13 @@ void play(Game& g) {
 		string op;
 		cin >> op;
 		if (op == "End") break;
-		
+
 		int r, m;
 		cin >> r >> m;
 		
 		Block* b = get_block_type(op,r,m);
 		g.block_down(b);
-		//debug(g);
+		debug(g);
 
 	}
 }
@@ -792,9 +550,242 @@ Block* get_block_type(string op, int r, int m) {
 	{
 		return new O(r, m);
 	}
-	else { cout << "wrong block imfo" << endl; exit(1); erro_print(CONSTRUCT_ERROR);
+	else {
+		error(WRONG_BLOCK);
+		return nullptr;
 	}
 }
+
+
+pair<int, int> Block::cell_loc(int n) {
+	switch (n)
+	{
+	case 1:
+		return make_pair(cell1.first + ref_p.first, cell1.second + ref_p.second);
+	case 2:
+		return make_pair(cell2.first + ref_p.first, cell2.second + ref_p.second);
+	case 3:
+		return make_pair(cell3.first + ref_p.first, cell3.second + ref_p.second);
+	case 4:
+		return make_pair(cell4.first + ref_p.first, cell4.second + ref_p.second);
+	default:
+		cout << "not that many cells" << endl;
+		exit(1);
+	}
+}
+
+pair<int, int> Block::highest_cell_loc() {
+	if (cell1.first <= cell2.first && cell1.first <= cell3.first && cell1.first <= cell4.first)
+		return make_pair(cell1.first + ref_p.first, cell1.second + ref_p.second);
+	else if (cell2.first <= cell1.first && cell2.first <= cell3.first && cell2.first <= cell4.first)
+		return make_pair(cell2.first + ref_p.first, cell2.second + ref_p.second);
+	else if (cell3.first <= cell1.first && cell3.first <= cell2.first && cell3.first <= cell4.first)
+		return make_pair(cell3.first + ref_p.first, cell3.second + ref_p.second);
+	else if (cell4.first <= cell1.first && cell4.first <= cell2.first && cell4.first <= cell3.first)
+		return make_pair(cell4.first + ref_p.first, cell4.second + ref_p.second);
+	else {
+		cout << "no highest cell???" << endl;
+		exit(1);
+	}
+}
+
+
+Game::Game()
+{
+	cout << "game construct" << endl;
+	while (1) {
+		cin >> row >> col;
+		if (row <= 15 && col <= 40) break;
+		else { cout << "Board too big!\n"; }
+	}
+	height = row - 1;
+	board = new bool*[row];
+	if (!board) 
+		error(CONSTRUCT_ERROR);
+	
+	for (int i = 0; i < row; i++) {
+		board[i] = new bool[col];
+		if (!board[i]) {
+			cout << "board col " << i << " establish not complete" << endl;
+			error(CONSTRUCT_ERROR);
+		}
+		for (int j = 0; j < col; j++) {
+			board[i][j] = 0;
+		}
+	}
+}
+Game::~Game()
+{
+	cout << "game delete" << endl;
+	for (int i = 0; i < row; i++) delete[]board[i];
+	delete[]board;
+}
+
+//大流程
+//9/24助教解惑後:
+//下落 - 著地or卡到方塊(包含碰到最上層) - 執行橫移 - (下落)-確定位置 - 消去 - 判定有無超出邊界
+//最後位置確定後，先消除再看是否還有超出邊界
+//橫移卡到算失敗
+void Game::block_down(Block* b) {
+
+	//左右out of range
+	if (out_of_range(b))
+		error(OUT_OF_RANGE);
+
+	//完整的顯示進去board 如果不行就 too high!
+	show_up(b);
+
+	//掉下去 直到碰到底後左右移動+再下去
+	fall(b);
+
+	//occupy空間
+	set(b);
+
+	detect_line(b);
+
+}
+
+
+//左右是否超出界線(包含預測橫移後)
+bool Game::out_of_range(Block* b) {
+	if (b->cell_loc(1).second + b->move_s < 0 || b->cell_loc(1).second + b->move_s >= col ||
+		b->cell_loc(2).second + b->move_s < 0 || b->cell_loc(2).second + b->move_s >= col ||
+		b->cell_loc(3).second + b->move_s < 0 || b->cell_loc(3).second + b->move_s >= col ||
+		b->cell_loc(4).second + b->move_s < 0 || b->cell_loc(4).second + b->move_s >= col)
+		return 1;
+	else
+		return 0;
+}
+
+//包含碰到要橫移(包含全部超出邊界依然碰到也橫移)
+void Game::show_up(Block*b) {
+
+	while (b->cell_loc(1).first < 0 || b->cell_loc(2).first < 0 ||
+		b->cell_loc(4).first < 0 || b->cell_loc(3).first < 0)
+	{
+		if (occupied(b, 1, 0))	//下一格有撞到
+		{
+
+			if (b->move_s != 0) //還沒橫移過
+			{
+				hrzt_move(b);	//完成橫移
+				continue;
+			}
+			else {				//已經橫移過
+				height = 0;
+				for (int k = 1; k <= 4; k++) {
+					if (b->cell_loc(k).first >= 0)
+						pos(b->cell_loc(k).first, b->cell_loc(k).second) = 1;
+				}
+				if (detect_line(b)) continue;//削掉後再判定一次
+
+				error(TOO_HIGH);	//橫移過/削掉後還是太高
+			}
+		}
+
+		b->ref_p.first += 1;	//如果能下降就下降
+	}
+}
+
+//包含碰到要橫移
+void Game::fall(Block*b) {
+
+	while (!occupied(b, 1, 0))
+	{
+		b->ref_p.first += 1;
+	}
+
+	if (b->move_s != 0) {
+		hrzt_move(b);
+		fall(b);
+	}
+
+}
+
+//設立方塊並計算高度
+void Game::set(Block*b) {
+
+	pos(b->cell_loc(1).first, b->cell_loc(1).second) = 1;
+	pos(b->cell_loc(2).first, b->cell_loc(2).second) = 1;
+	pos(b->cell_loc(3).first, b->cell_loc(3).second) = 1;
+	pos(b->cell_loc(4).first, b->cell_loc(4).second) = 1;
+
+	set_height(b);
+
+}
+void Game::set_height(Block*b) {
+	if (b->highest_cell_loc().first < height) height = b->highest_cell_loc().first;
+}
+
+//偵測是否有連線且消除
+bool Game::detect_line(Block*b) {
+
+	bool flag = false;
+
+	for (int i = height; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			if (!pos(i, j)) break;
+			if (j == col - 1) {
+				remove(b, i);
+				flag = true;
+			}
+		}
+	}
+
+	return flag;
+}
+void Game::remove(Block* b, int r) {
+
+	for (int k = 1; k <= 4; k++)
+		if (b->cell_loc(k).first < r) b->cell(k).first += 1;	//讓方塊判定下降
+
+	for (int i = r; i >= height; i--) {
+		for (int j = 0; j < col; j++) {
+			if (i == 0)  					//最上層
+				pos(i, j) = 0;
+			else
+				pos(i, j) = pos(i - 1, j);
+		}
+	}
+
+	//還在show_up的case
+	if (b->cell_loc(1).first < 0 || b->cell_loc(2).first < 0 ||
+		b->cell_loc(4).first < 0 || b->cell_loc(3).first < 0)
+	{
+		for (int k = 1; k <= 4; k++) {
+			if (b->cell_loc(k).first == 0)
+				pos(b->cell_loc(k).first, b->cell_loc(k).second) = 1;
+			//該col上面還有未進去的block 讓他降下來
+		}
+	}
+}
+
+
+void Game::hrzt_move(Block* b) {
+
+	while (b->move_s != 0) {
+		b->move();
+		if (occupied(b, 0, 0))
+			error(HRZT_HIT);
+	}
+}
+
+// i = offset of y ; j = offset of x
+bool Game::occupied(Block*b, int i, int j) {
+
+	if (b->cell_loc(1).first + i >= row || b->cell_loc(2).first + i >= row ||
+		b->cell_loc(4).first + i >= row || b->cell_loc(3).first + i >= row)
+		return 1;
+
+	if ((b->cell_loc(1).first + i >= 0 && pos(b->cell_loc(1).first + i, b->cell_loc(1).second + j)) ||
+		(b->cell_loc(2).first + i >= 0 && pos(b->cell_loc(2).first + i, b->cell_loc(2).second + j)) ||
+		(b->cell_loc(3).first + i >= 0 && pos(b->cell_loc(3).first + i, b->cell_loc(3).second + j)) ||
+		(b->cell_loc(4).first + i >= 0 && pos(b->cell_loc(4).first + i, b->cell_loc(4).second + j)))
+		return 1;
+	else return 0;
+}
+
+
 
 
 //debug用 顯示每一步的結果
@@ -808,7 +799,7 @@ void debug(Game& g) {
 }
 
 //error用 顯示哪裡出錯
-void erro_print(int e) {
+void error(int e) {
 
 	switch (e)
 	{
@@ -819,17 +810,20 @@ void erro_print(int e) {
 		cout << "\nToo high!" << endl;
 		break;
 	case 3:
-		cout << "\nAfter horizontal move or reducing blocks,"
-			"still too high!" << endl;
+		cout << "\nHorizontal move failed!"<< endl;
 		break;
 	case 4:
-		cout << "\nHorizontal move failed!" << endl;
+		cout << "\nWrong block type" << endl;
 		break;
 	case 5:
-		cout << "board row establish not complete" << endl;
+		cout << "\nboard row establish not complete" << endl;
 		break;
+
 	default:
 		cout << "Other error" << endl;
 	}
+	Game g;
+	play(g);
+	game_final(g);
 	exit(1);
 }
