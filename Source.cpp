@@ -822,8 +822,6 @@ void error(int e) {
 	default:
 		cout << "Other error" << endl;
 	}
-	Game g;
-	play(g);
-	game_final(g);
+
 	exit(1);
 }
