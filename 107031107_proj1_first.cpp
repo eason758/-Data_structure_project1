@@ -608,8 +608,6 @@ pair<int, int> Block::highest_cell_loc() {
 
 void Game::init() {
 
-	cout << "game construct" << endl;
-
 	while (1) {
 		f >> row >> col;
 		if (row <= 15 && col <= 40) break;
@@ -638,7 +636,6 @@ Game::Game()
 {}
 Game::~Game()
 {
-	cout << "game delete" << endl;
 	for (int i = 0; i < row; i++) delete[]board[i];
 	delete[]board;
 }
