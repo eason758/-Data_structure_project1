@@ -4,14 +4,14 @@
 
 using namespace std;
 
-ifstream f("107031107_proj1_first.data", ios::in);
+ifstream f;
 ofstream o("107031107_proj1.final", ios::out);
 
-//¤j¬yµ{
-//9/24§U±Ğ¸Ñ´b«á:
-//¤U¸¨ - µÛ¦aor¥d¨ì¤è¶ô(¥]§t¸I¨ì³Ì¤W¼h) - °õ¦æ¾î²¾ - (¤U¸¨)-½T©w¦ì¸m - ®ø¥h - §P©w¦³µL¶W¥XÃä¬É
-//³Ì«á¦ì¸m½T©w«á¡A¥ı®ø°£¦A¬İ¬O§_ÁÙ¦³¶W¥XÃä¬É
-//¾î²¾¥d¨ìºâ¥¢±Ñ
+//å¤§æµç¨‹
+//9/24åŠ©æ•™è§£æƒ‘å¾Œ:
+//ä¸‹è½ - è‘—åœ°orå¡åˆ°æ–¹å¡Š(åŒ…å«ç¢°åˆ°æœ€ä¸Šå±¤) - åŸ·è¡Œæ©«ç§» - (ä¸‹è½)-ç¢ºå®šä½ç½® - æ¶ˆå» - åˆ¤å®šæœ‰ç„¡è¶…å‡ºé‚Šç•Œ
+//æœ€å¾Œä½ç½®ç¢ºå®šå¾Œï¼Œå…ˆæ¶ˆé™¤å†çœ‹æ˜¯å¦é‚„æœ‰è¶…å‡ºé‚Šç•Œ
+//æ©«ç§»å¡åˆ°ç®—å¤±æ•—
 
 
 enum E {
@@ -421,12 +421,12 @@ public:
 		return board[r][c];
 	}
 
-	void block_down(Block* b);//block©¹¤U±¼(¤j¬yµ{/¤¶­±)
+	void block_down(Block* b);//blockå¾€ä¸‹æ‰(å¤§æµç¨‹/ä»‹é¢)
 
 
 private:
 
-	bool out_of_range(Block* b);//ÀË¬d¥ª¥k¦³µL¶W¥X
+	bool out_of_range(Block* b);//æª¢æŸ¥å·¦å³æœ‰ç„¡è¶…å‡º
 	bool occupied(Block*b, int i, int j);
 	void hrzt_move(Block*b);
 
@@ -435,20 +435,22 @@ private:
 	void fall(Block*b);
 	void set(Block*b);
 	void set_height(Block* b);
-	bool detect_line(Block*b);	//°»´ú¦³¨S³s½u //¦^¶Ç³s½u´X±ø
-	void remove(Block*b, int r);		//²¾°£
+	bool detect_line(Block*b);	//åµæ¸¬æœ‰æ²’é€£ç·š //å›å‚³é€£ç·šå¹¾æ¢
+	void remove(Block*b, int r);		//ç§»é™¤
 
 };
 
 
 void debug(Game& g);
-void play(Game& g);		//¦¬testcase¥B­pºâ
-void game_output(Game& g);	//±Nµ²ªGÅã¥Ü¥X¨Ó
+void play(Game& g);		//æ”¶testcaseä¸”è¨ˆç®—
+void game_output(Game& g);	//å°‡çµæœé¡¯ç¤ºå‡ºä¾†
 
 Block* get_block_type(string op, int r, int m);
 
 
-int main() {
+int main(int argc, char *argv[]) {
+
+	f.open(argv[1]);
 
 	Game g;
 	g.init();	//game init(set row/col)
@@ -644,17 +646,17 @@ Game::~Game()
 
 void Game::block_down(Block* b) {
 
-	//¥ª¥kout of range
+	//å·¦å³out of range
 	if (out_of_range(b))
 		error(OUT_OF_RANGE);
 
-	//§¹¾ãªºÅã¥Ü¶i¥hboard ¦pªG¤£¦æ´N too high!
+	//å®Œæ•´çš„é¡¯ç¤ºé€²å»board å¦‚æœä¸è¡Œå°± too high!
 	show_up(b);
 
-	//±¼¤U¥h ª½¨ì¸I¨ì©³«á¥ª¥k²¾°Ê+¦A¤U¥h
+	//æ‰ä¸‹å» ç›´åˆ°ç¢°åˆ°åº•å¾Œå·¦å³ç§»å‹•+å†ä¸‹å»
 	fall(b);
 
-	//occupyªÅ¶¡
+	//occupyç©ºé–“
 	set(b);
 
 	detect_line(b);
@@ -662,7 +664,7 @@ void Game::block_down(Block* b) {
 }
 
 
-//¥ª¥k¬O§_¶W¥X¬É½u(¥]§t¹w´ú¾î²¾«á)
+//å·¦å³æ˜¯å¦è¶…å‡ºç•Œç·š(åŒ…å«é æ¸¬æ©«ç§»å¾Œ)
 bool Game::out_of_range(Block* b) {
 	if (b->cell_loc(1).second + b->move_s < 0 || b->cell_loc(1).second + b->move_s >= col ||
 		b->cell_loc(2).second + b->move_s < 0 || b->cell_loc(2).second + b->move_s >= col ||
@@ -673,37 +675,37 @@ bool Game::out_of_range(Block* b) {
 		return 0;
 }
 
-//¥]§t¸I¨ì­n¾î²¾(¥]§t¥ş³¡¶W¥XÃä¬É¨ÌµM¸I¨ì¤]¾î²¾)
+//åŒ…å«ç¢°åˆ°è¦æ©«ç§»(åŒ…å«å…¨éƒ¨è¶…å‡ºé‚Šç•Œä¾ç„¶ç¢°åˆ°ä¹Ÿæ©«ç§»)
 void Game::show_up(Block*b) {
 
 	while (b->cell_loc(1).first < 0 || b->cell_loc(2).first < 0 ||
 		b->cell_loc(4).first < 0 || b->cell_loc(3).first < 0)
 	{
-		if (occupied(b, 1, 0))	//¤U¤@®æ¦³¼²¨ì
+		if (occupied(b, 1, 0))	//ä¸‹ä¸€æ ¼æœ‰æ’åˆ°
 		{
 
-			if (b->move_s != 0) //ÁÙ¨S¾î²¾¹L
+			if (b->move_s != 0) //é‚„æ²’æ©«ç§»é
 			{
-				hrzt_move(b);	//§¹¦¨¾î²¾
+				hrzt_move(b);	//å®Œæˆæ©«ç§»
 				continue;
 			}
-			else {				//¤w¸g¾î²¾¹L
+			else {				//å·²ç¶“æ©«ç§»é
 				height = 0;
 				for (int k = 1; k <= 4; k++) {
 					if (b->cell_loc(k).first >= 0)
 						pos(b->cell_loc(k).first, b->cell_loc(k).second) = 1;
 				}
-				if (detect_line(b)) continue;//«d±¼«á¦A§P©w¤@¦¸
+				if (detect_line(b)) continue;//å‰Šæ‰å¾Œå†åˆ¤å®šä¸€æ¬¡
 
-				error(TOO_HIGH);	//¾î²¾¹L/«d±¼«áÁÙ¬O¤Ó°ª
+				error(TOO_HIGH);	//æ©«ç§»é/å‰Šæ‰å¾Œé‚„æ˜¯å¤ªé«˜
 			}
 		}
 
-		b->ref_p.first += 1;	//¦pªG¯à¤U­°´N¤U­°
+		b->ref_p.first += 1;	//å¦‚æœèƒ½ä¸‹é™å°±ä¸‹é™
 	}
 }
 
-//¥]§t¸I¨ì­n¾î²¾
+//åŒ…å«ç¢°åˆ°è¦æ©«ç§»
 void Game::fall(Block*b) {
 
 	while (!occupied(b, 1, 0))
@@ -718,7 +720,7 @@ void Game::fall(Block*b) {
 
 }
 
-//³]¥ß¤è¶ô¨Ã­pºâ°ª«×
+//è¨­ç«‹æ–¹å¡Šä¸¦è¨ˆç®—é«˜åº¦
 void Game::set(Block*b) {
 
 	pos(b->cell_loc(1).first, b->cell_loc(1).second) = 1;
@@ -733,7 +735,7 @@ void Game::set_height(Block*b) {
 	if (b->highest_cell_loc().first < height) height = b->highest_cell_loc().first;
 }
 
-//°»´ú¬O§_¦³³s½u¥B®ø°£
+//åµæ¸¬æ˜¯å¦æœ‰é€£ç·šä¸”æ¶ˆé™¤
 bool Game::detect_line(Block*b) {
 
 	bool flag = false;
@@ -753,25 +755,25 @@ bool Game::detect_line(Block*b) {
 void Game::remove(Block* b, int r) {
 
 	for (int k = 1; k <= 4; k++)
-		if (b->cell_loc(k).first < r) b->cell(k).first += 1;	//Åı¤è¶ô§P©w¤U­°
+		if (b->cell_loc(k).first < r) b->cell(k).first += 1;	//è®“æ–¹å¡Šåˆ¤å®šä¸‹é™
 
 	for (int i = r; i >= height; i--) {
 		for (int j = 0; j < col; j++) {
-			if (i == 0)  					//³Ì¤W¼h
+			if (i == 0)  					//æœ€ä¸Šå±¤
 				pos(i, j) = 0;
 			else
 				pos(i, j) = pos(i - 1, j);
 		}
 	}
 
-	//ÁÙ¦bshow_upªºcase
+	//é‚„åœ¨show_upçš„case
 	if (b->cell_loc(1).first < 0 || b->cell_loc(2).first < 0 ||
 		b->cell_loc(4).first < 0 || b->cell_loc(3).first < 0)
 	{
 		for (int k = 1; k <= 4; k++) {
 			if (b->cell_loc(k).first == 0)
 				pos(b->cell_loc(k).first, b->cell_loc(k).second) = 1;
-			//¸Ócol¤W­±ÁÙ¦³¥¼¶i¥hªºblock Åı¥L­°¤U¨Ó
+			//è©²colä¸Šé¢é‚„æœ‰æœªé€²å»çš„block è®“ä»–é™ä¸‹ä¾†
 		}
 	}
 }
@@ -804,7 +806,7 @@ bool Game::occupied(Block*b, int i, int j) {
 
 
 
-//debug¥Î Åã¥Ü¨C¤@¨Bªºµ²ªG
+//debugç”¨ é¡¯ç¤ºæ¯ä¸€æ­¥çš„çµæœ
 void debug(Game& g) {
 	for (int i = 0; i < g.get_row(); i++) {
 		for (int j = 0; j < g.get_col(); j++) {
@@ -814,7 +816,7 @@ void debug(Game& g) {
 	}
 }
 
-//error¥Î Åã¥Ü­ş¸Ì¥X¿ù
+//errorç”¨ é¡¯ç¤ºå“ªè£¡å‡ºéŒ¯
 void error(int e) {
 
 	switch (e)
