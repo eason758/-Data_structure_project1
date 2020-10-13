@@ -4,8 +4,7 @@
 
 using namespace std;
 
-ifstream f;
-ofstream o("107031107_proj1.final", ios::out);
+ifstream f("testcase1.txt", ios::in);
 
 //大流程
 //9/24助教解惑後:
@@ -402,9 +401,6 @@ public:
 
 	Game();
 	~Game();
-
-	void init();
-
 	inline int get_row() const {
 		return row;
 	}
@@ -443,19 +439,17 @@ private:
 
 void debug(Game& g);
 void play(Game& g);		//收testcase且計算
-void game_output(Game& g);	//將結果顯示出來
+void game_final(Game& g);	//將結果顯示出來
 
 Block* get_block_type(string op, int r, int m);
 
 
-int main(int argc, char *argv[]) {
+int main() {
 
-	f.open(argv[1]);
-
-	Game g;
-	g.init();	//game init(set row/col)
+	
+	Game g;		//including game init(set row/col)
 	play(g);
-	game_output(g);
+	game_final(g);
 	
 	return 0;
 }
@@ -469,22 +463,22 @@ void play(Game& g) {
 		if (op == "End") break;
 
 		int r, m;
-		f >> r >> m;
+		cin >> r >> m;
 		
 		Block* b = get_block_type(op,r,m);
 		g.block_down(b);
-		//debug(g);
+		debug(g);
 
 	}
 }
 
-void game_output(Game& g) {
+void game_final(Game& g) {
 
 	for (int i = 0; i < g.get_row(); i++) {
 		for (int j = 0; j < g.get_col(); j++) {
-			o <<" "<< g.pos(i,j);
+			cout <<" "<< g.pos(i,j);
 		}
-		o << " \n";
+		cout << " \n";
 	}
 }
 
@@ -606,8 +600,9 @@ pair<int, int> Block::highest_cell_loc() {
 }
 
 
-void Game::init() {
-
+Game::Game()
+{
+	cout << "game construct" << endl;
 	while (1) {
 		f >> row >> col;
 		if (row <= 15 && col <= 40) break;
@@ -615,9 +610,9 @@ void Game::init() {
 	}
 	height = row - 1;
 	board = new bool*[row];
-	if (!board)
+	if (!board) 
 		error(CONSTRUCT_ERROR);
-
+	
 	for (int i = 0; i < row; i++) {
 		board[i] = new bool[col];
 		if (!board[i]) {
@@ -628,14 +623,10 @@ void Game::init() {
 			board[i][j] = 0;
 		}
 	}
-
-
 }
-
-Game::Game()
-{}
 Game::~Game()
 {
+	cout << "game delete" << endl;
 	for (int i = 0; i < row; i++) delete[]board[i];
 	delete[]board;
 }
